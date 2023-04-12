@@ -149,7 +149,7 @@ void CMainMenu::OnOpenRom(HWND hWnd)
     {
         return;
     }
-    
+
     stdstr ext = CPath(File).GetExtension();
     if ((_stricmp(ext.c_str(), "ndd") != 0) && (_stricmp(ext.c_str(), "d64") != 0))
     {
@@ -870,6 +870,8 @@ void CMainMenu::FillOutMenu(HMENU hMenu)
         }
     }
     FileMenu.push_back(MENU_ITEM(SPLITER));
+    FileMenu.push_back(MENU_ITEM(ID_DEBUGGER_SCRIPTS, EMPTY_STRING, EMPTY_STDSTR, nullptr, L"Lua Scripts..."));
+    FileMenu.push_back(MENU_ITEM(SPLITER));
     FileMenu.push_back(MENU_ITEM(ID_FILE_EXIT, MENU_EXIT, m_ShortCuts.ShortCutString(ID_FILE_EXIT, RunningState)));
 
     // Current save
@@ -1192,8 +1194,6 @@ void CMainMenu::FillOutMenu(HMENU hMenu)
         Item.Reset(ID_DEBUGGER_BREAKPOINTS, EMPTY_STRING, EMPTY_STDSTR, nullptr, L"Commands...");
         DebugMenu.push_back(Item);
         Item.Reset(ID_DEBUGGER_MEMORY, EMPTY_STRING, EMPTY_STDSTR, nullptr, L"View memory...");
-        DebugMenu.push_back(Item);
-        Item.Reset(ID_DEBUGGER_SCRIPTS, EMPTY_STRING, EMPTY_STDSTR, nullptr, L"Scripts...");
         DebugMenu.push_back(Item);
 
         DebugMenu.push_back(MENU_ITEM(SPLITER));
