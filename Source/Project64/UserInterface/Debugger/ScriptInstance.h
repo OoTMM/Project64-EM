@@ -43,6 +43,8 @@ private:
     void ThreadEntry();
 
     int API_Print(void);
+    template <typename T> int API_MemoryRead(void);
+    template <typename T> int API_MemoryWrite(void);
 
     CDebuggerUI*        _debugger;
     INSTANCE_STATE      _state;

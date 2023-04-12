@@ -75,6 +75,29 @@ void CScriptInstance::RegisterAPI()
     /* Register print */
     lua_pushcfunction(_L, dispatch<&CScriptInstance::API_Print>);
     lua_setglobal(_L, "print");
+
+    /* Register memory */
+    static const luaL_Reg kRegMemory[] = {
+        { "read_u8",   dispatch<&CScriptInstance::API_MemoryRead<uint8_t>>  },
+        { "read_u16",  dispatch<&CScriptInstance::API_MemoryRead<uint16_t>> },
+        { "read_u32",  dispatch<&CScriptInstance::API_MemoryRead<uint32_t>> },
+        { "read_s8",   dispatch<&CScriptInstance::API_MemoryRead<int8_t>>   },
+        { "read_s16",  dispatch<&CScriptInstance::API_MemoryRead<int16_t>>  },
+        { "read_s32",  dispatch<&CScriptInstance::API_MemoryRead<int32_t>>  },
+        { "read_f32",  dispatch<&CScriptInstance::API_MemoryRead<float>>   },
+        { "read_f64",  dispatch<&CScriptInstance::API_MemoryRead<double>>  },
+        { "write_u8",  dispatch<&CScriptInstance::API_MemoryWrite<uint8_t>>  },
+        { "write_u16", dispatch<&CScriptInstance::API_MemoryWrite<uint16_t>> },
+        { "write_u32", dispatch<&CScriptInstance::API_MemoryWrite<uint32_t>> },
+        { "write_s8",  dispatch<&CScriptInstance::API_MemoryWrite<int8_t>>   },
+        { "write_s16", dispatch<&CScriptInstance::API_MemoryWrite<int16_t>>  },
+        { "write_s32", dispatch<&CScriptInstance::API_MemoryWrite<int32_t>>  },
+        { "write_f32", dispatch<&CScriptInstance::API_MemoryWrite<float>>   },
+        { "write_f64", dispatch<&CScriptInstance::API_MemoryWrite<double>>  },
+        { nullptr, nullptr }
+    };
+    luaL_newlib(_L, kRegMemory);
+    lua_setglobal(_L, "memory");
 }
 
 void CScriptInstance::ThreadEntry()
@@ -108,6 +131,30 @@ int CScriptInstance::API_Print(void)
         /* Pop */
         lua_pop(_L, 1);
     }
+
+    return 0;
+}
+
+template <typename T> int CScriptInstance::API_MemoryRead(void)
+{
+    uint32_t addr;
+    T value;
+
+    addr = (uint32_t)luaL_checkinteger(_L, 1);
+    _debugger->DebugLoad_VAddr<T>(addr, value);
+    lua_pushnumber(_L, value);
+
+    return 1;
+}
+
+template <typename T> int CScriptInstance::API_MemoryWrite(void)
+{
+    uint32_t addr;
+    T value;
+
+    addr = (uint32_t)luaL_checkinteger(_L, 1);
+    value = (T)luaL_checknumber(_L, 2);
+    _debugger->DebugStore_VAddr<T>(addr, value);
 
     return 0;
 }
