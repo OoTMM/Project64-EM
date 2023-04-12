@@ -3,31 +3,13 @@
 #include "Debugger-Scripts.h"
 
 #include "ScriptInstance.h"
-#include "ScriptHook.h"
 
 CScriptSystem::CScriptSystem(CDebuggerUI* debugger)
 {
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-    m_NextCallbackId = 0;
-    m_NumCallbacks = 0;
-
     m_Debugger = debugger;
-
-    m_HookCPUExec = new CScriptHook(this);
-    m_HookCPUExecOpcode = new CScriptHook(this);
-    m_HookCPURead = new CScriptHook(this);
-    m_HookCPUWrite = new CScriptHook(this);
-    m_HookCPUGPRValue = new CScriptHook(this);
-    m_HookFrameDrawn = new CScriptHook(this);
-
-    RegisterHook("exec", m_HookCPUExec);
-    RegisterHook("read", m_HookCPURead);
-    RegisterHook("write", m_HookCPUWrite);
-    RegisterHook("opcode", m_HookCPUExecOpcode);
-    RegisterHook("gprvalue", m_HookCPUGPRValue);
-    RegisterHook("draw", m_HookFrameDrawn);
 
     HMODULE hInst = GetModuleHandle(nullptr);
     HRSRC hRes = FindResource(hInst, MAKEINTRESOURCE(IDR_JSAPI_TEXT), L"TEXT");
@@ -44,12 +26,6 @@ CScriptSystem::CScriptSystem(CDebuggerUI* debugger)
 
 CScriptSystem::~CScriptSystem()
 {
-    for (size_t i = 0; i < m_Hooks.size(); i++)
-    {
-        delete m_Hooks[i].cbList;
-    }
-
-    UnregisterHooks();
     free(m_APIScript);
 }
 
@@ -58,7 +34,7 @@ const char* CScriptSystem::APIScript()
     return m_APIScript;
 }
 
-void CScriptSystem::RunScript(const char * path)
+void CScriptSystem::RunScript(const char* path)
 {
     CGuard guard(m_CS);
     CScriptInstance* scriptInstance = new CScriptInstance(m_Debugger);
@@ -129,74 +105,4 @@ CScriptInstance* CScriptSystem::GetInstance(const char* path)
     }
 
     return nullptr;
-}
-
-bool CScriptSystem::HasCallbacksForInstance(CScriptInstance* scriptInstance)
-{
-    for (size_t i = 0; i < m_Hooks.size(); i++)
-    {
-        if (m_Hooks[i].cbList->HasContext(scriptInstance))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-void CScriptSystem::ClearCallbacksForInstance(CScriptInstance* scriptInstance)
-{
-    for (size_t i = 0; i < m_Hooks.size(); i++)
-    {
-        m_Hooks[i].cbList->RemoveByInstance(scriptInstance);
-    }
-}
-
-void CScriptSystem::RemoveCallbackById(int callbackId)
-{
-    for (size_t i = 0; i < m_Hooks.size(); i++)
-    {
-        m_Hooks[i].cbList->RemoveById(callbackId);
-    }
-}
-
-void CScriptSystem::RegisterHook(const char* hookId, CScriptHook* cbList)
-{
-    HOOKENTRY hook = { hookId, cbList };
-    m_Hooks.push_back(hook);
-}
-
-void CScriptSystem::UnregisterHooks()
-{
-    m_Hooks.clear();
-}
-
-CScriptHook* CScriptSystem::GetHook(const char* hookId)
-{
-    size_t size = m_Hooks.size();
-    for (size_t i = 0; i < size; i++)
-    {
-        if (strcmp(m_Hooks[i].hookId, hookId) == 0)
-        {
-            return m_Hooks[i].cbList;
-        }
-    }
-    return nullptr;
-}
-
-int CScriptSystem::GetNextCallbackId()
-{
-    return m_NextCallbackId++;
-}
-
-void CScriptSystem::CallbackAdded()
-{
-    m_NumCallbacks++;
-}
-
-void CScriptSystem::CallbackRemoved()
-{
-    if (m_NumCallbacks > 0)
-    {
-        m_NumCallbacks--;
-    }
 }

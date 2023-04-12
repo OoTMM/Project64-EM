@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "DebuggerUI.h"
-#include "ScriptHook.h"
 
 #include "CPULog.h"
 #include "DMALog.h"
@@ -464,7 +463,7 @@ void CDebuggerUI::HandleCPUException(void)
     int intr = (g_Reg->CAUSE_REGISTER >> 8) & 0xFF;
     int fpExc = (g_Reg->m_FPCR[31] >> 12) & 0x3F;
     int rcpIntr = g_Reg->MI_INTR_REG & 0x2F;
-    
+
     if ((ExceptionBreakpoints() & (1 << exc)))
     {
         if (exc == 15) // Floating-point exception
@@ -521,7 +520,7 @@ void CDebuggerUI::HandleCartToRamDMA(void)
 
     m_DMALog->AddEntry(dmaRomAddr, dmaRamAddr, dmaLen);
     Debug_RefreshDMALogWindow();
-    
+
     // Break if write breakpoint exists anywhere in target buffer
     if (m_Breakpoints->WriteBPExistsInChunk(dmaRamAddr, dmaLen))
     {
@@ -549,30 +548,6 @@ void CDebuggerUI::CPUStepStarted()
             // Memory is locked, skip op
             g_Settings->SaveBool(Debugger_SkipOp, true);
             return;
-        }
-    }
-
-    if (m_ScriptSystem->HaveCallbacks())
-    {
-        m_ScriptSystem->HookCPUExec()->InvokeByAddressInRange(pc);
-        if (SkipOp()) { return; }
-
-        m_ScriptSystem->HookCPUExecOpcode()->InvokeByAddressInRange_MaskedOpcode(pc, R4300iOp::m_Opcode.Hex);
-        if (SkipOp()) { return; }
-
-        m_ScriptSystem->HookCPUGPRValue()->InvokeByAddressInRange_GPRValue(pc);
-        if (SkipOp()) { return; }
-
-        if (bStoreOp)
-        {
-            m_ScriptSystem->HookCPUWrite()->InvokeByAddressInRange(storeAddress);
-            if (SkipOp()) { return; }
-        }
-
-        if (opInfo.IsLoadCommand())
-        {
-            m_ScriptSystem->HookCPURead()->InvokeByAddressInRange(opInfo.GetLoadStoreAddress());
-            if (SkipOp()) { return; }
         }
     }
 
@@ -644,7 +619,7 @@ void CDebuggerUI::CPUStepEnded()
     {
         return;
     }
-    
+
     OPCODE Opcode = R4300iOp::m_Opcode;
     uint32_t op = Opcode.op;
     uint32_t funct = Opcode.funct;
@@ -697,7 +672,6 @@ void CDebuggerUI::FrameDrawn()
     SetBkColor(hdc, RGB(0, 0, 0));
 
     m_ScriptSystem->SetScreenDC(hdc);
-    m_ScriptSystem->HookFrameDrawn()->InvokeAll();
 
     ReleaseDC(hMainWnd, hdc);
 }
