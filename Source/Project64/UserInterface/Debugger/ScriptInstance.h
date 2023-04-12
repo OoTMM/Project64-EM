@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 
+#include "ScriptInstanceState.h"
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <mswsock.h>
@@ -18,13 +19,6 @@ extern "C"
 #pragma comment(lib, "Mswsock.lib")
 
 class CScriptSystem;
-
-typedef enum {
-    STATE_STARTED, // Initial evaluation and execution
-    STATE_RUNNING, // Event loop running with pending events
-    STATE_STOPPED,  // No pending events
-    STATE_INVALID
-} INSTANCE_STATE;
 
 class CScriptInstance
 {
@@ -45,9 +39,16 @@ private:
     int API_Print(void);
     template <typename T> int API_MemoryRead(void);
     template <typename T> int API_MemoryWrite(void);
+    int API_SocketSleep(void);
+    int API_SocketTcp(void);
+    int API_ClassSocketSend(void);
+    int API_ClassSocketRecv(void);
+    int API_ClassSocketClose(void);
 
     CDebuggerUI*        _debugger;
     INSTANCE_STATE      _state;
     std::thread         _thread;
     lua_State*          _L;
+
+    int                 _refMetaSocket;
 };

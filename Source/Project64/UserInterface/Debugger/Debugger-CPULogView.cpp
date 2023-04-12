@@ -1,7 +1,5 @@
 #include "stdafx.h"
-#include "DebuggerUI.h"
 #include "CPULog.h"
-
 #include "Debugger-CPULogView.h"
 #include <Project64-core/N64System/Mips/OpCodeName.h>
 
@@ -45,7 +43,7 @@ LRESULT CDebugCPULogView::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM 
     m_CPUListView.SetColumnWidth(0, 65);
     m_CPUListView.SetColumnWidth(1, 60);
     m_CPUListView.SetColumnWidth(2, 120);
-    
+
     bool bLoggingEnabled = g_Settings->LoadBool(Debugger_CPULoggingEnabled);
     uint32_t bufferSize = g_Settings->LoadDword(Debugger_CPULogBufferSize);
 
@@ -54,7 +52,7 @@ LRESULT CDebugCPULogView::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM 
     m_BuffSizeEdit.SetDisplayType(CEditNumber32::DisplayDec);
     m_BuffSizeEdit.SetValue(bufferSize);
     m_BuffSizeEdit.EnableWindow(!bLoggingEnabled);
-    
+
     RefreshList(true);
 
     m_ExportBtn.EnableWindow(false);
@@ -128,7 +126,7 @@ LRESULT CDebugCPULogView::OnClicked(WORD /*wNotifyCode*/, WORD wID, HWND, BOOL& 
         Export();
         break;
     }
-    
+
     return FALSE;
 }
 
@@ -392,7 +390,7 @@ void CDebugCPULogView::Export(void)
 
     OPENFILENAMEA openfilename;
     char filePath[255];
-    
+
     memset(&filePath, 0, sizeof(filePath));
     memset(&openfilename, 0, sizeof(openfilename));
 

@@ -204,7 +204,7 @@ void CDebugCommandsView::InterceptKeyDown(WPARAM wParam, LPARAM /*lParam*/)
     switch (wParam)
     {
     case VK_F1: CPUSkip(); break;
-    case VK_F2: 
+    case VK_F2:
         if (WaitingForStep())
         {
             m_StepEvent.Trigger();
@@ -1279,7 +1279,7 @@ void CDebugCommandsView::BeginOpEdit(uint32_t address)
     //itemRect.bottom += 0;
     itemRect.left += listRect.left + 3;
     itemRect.right += 100;
-    
+
     char* command = (char*)R4300iOpcodeName(opcode, address);
 
     m_OpEdit.ShowWindow(SW_SHOW);
@@ -1381,7 +1381,7 @@ LRESULT CDebugCommandsView::OnCommandListRightClicked(NMHDR* pNMHDR)
 
     HMENU hMenu = LoadMenu(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDR_OP_POPUP));
     HMENU hPopupMenu = GetSubMenu(hMenu, 0);
-    
+
     if (m_SelectedOpInfo.IsStaticJump())
     {
         m_FollowAddress = (m_SelectedAddress & 0xF0000000) | (m_SelectedOpCode.target * 4);

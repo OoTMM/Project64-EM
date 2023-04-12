@@ -1,8 +1,10 @@
 #pragma once
 
 #include <stdafx.h>
+#include "DebuggerUI.h"
+#include "ScriptInstanceState.h"
 
-#include "ScriptInstance.h"
+class CScriptInstance;
 
 class CScriptSystem
 {

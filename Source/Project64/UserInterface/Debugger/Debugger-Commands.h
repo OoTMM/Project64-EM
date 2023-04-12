@@ -118,7 +118,7 @@ private:
         NOTIFY_HANDLER_EX(IDC_CMD_LIST, NM_RCLICK, OnCommandListRightClicked)
         NOTIFY_HANDLER_EX(IDC_REG_TABS, TCN_SELCHANGE, OnRegisterTabChange)
         NOTIFY_HANDLER_EX(IDC_CMD_LIST, NM_CUSTOMDRAW, OnCustomDrawList)
-        
+
         MSG_WM_DESTROY(OnDestroy)
         CHAIN_MSG_MAP(CDialogResize<CDebugCommandsView>)
         MSG_WM_EXITSIZEMOVE(OnExitSizeMove)

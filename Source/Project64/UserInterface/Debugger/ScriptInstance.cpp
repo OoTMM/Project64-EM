@@ -5,6 +5,16 @@
 #include "ScriptSystem.h"
 #include "Breakpoints.h"
 
+namespace
+{
+
+struct Socket
+{
+    sockaddr_storage addr;
+};
+
+}
+
 using LuaImpl = int (CScriptInstance::*)(void);
 
 template <LuaImpl func>
@@ -98,6 +108,29 @@ void CScriptInstance::RegisterAPI()
     };
     luaL_newlib(_L, kRegMemory);
     lua_setglobal(_L, "memory");
+
+    /* Register socket class  */
+    static const luaL_Reg kRegClassSocket[] = {
+        { "send", dispatch<&CScriptInstance::API_ClassSocketSend> },
+        { "recv", dispatch<&CScriptInstance::API_ClassSocketRecv> },
+        { "close", dispatch<&CScriptInstance::API_ClassSocketClose> },
+        { nullptr, nullptr }
+    };
+    luaL_newmetatable(_L, "socket");
+    lua_pushnil(_L);
+    lua_setfield(_L, -2, "__metatable");
+    luaL_newlib(_L, kRegClassSocket);
+    lua_setfield(_L, -2, "__index");
+    lua_pop(_L, 1);
+
+    /* Register socket */
+    static const luaL_Reg kRegSocket[] = {
+        { "sleep", dispatch<&CScriptInstance::API_SocketSleep> },
+        { "tcp", dispatch<&CScriptInstance::API_SocketTcp> },
+        { nullptr, nullptr }
+    };
+    luaL_newlib(_L, kRegSocket);
+    lua_setglobal(_L, "socket");
 }
 
 void CScriptInstance::ThreadEntry()
@@ -156,5 +189,128 @@ template <typename T> int CScriptInstance::API_MemoryWrite(void)
     value = (T)luaL_checknumber(_L, 2);
     _debugger->DebugStore_VAddr<T>(addr, value);
 
+    return 0;
+}
+
+int CScriptInstance::API_SocketSleep(void)
+{
+    double seconds;
+
+    seconds = luaL_checknumber(_L, 1);
+    Sleep((DWORD)(seconds * 1000.0));
+
+    return 0;
+}
+
+int CScriptInstance::API_SocketTcp(void)
+{
+    SOCKET fd;
+    const char* host;
+    uint16_t    port;
+    addrinfo    hints{};
+    addrinfo*   result;
+
+    /* Get params */
+    host = luaL_checkstring(_L, 1);
+    port = (uint16_t)luaL_checkinteger(_L, 2);
+
+    /* Resolve host */
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    if (getaddrinfo(host, nullptr, &hints, &result))
+    {
+        lua_pushnil(_L);
+        return 1;
+    }
+
+    /* Set port */
+    if (result->ai_family == AF_INET)
+    {
+        sockaddr_in* addr = (sockaddr_in*)result->ai_addr;
+        addr->sin_port = htons(port);
+    }
+    else if (result->ai_family == AF_INET6)
+    {
+        sockaddr_in6* addr = (sockaddr_in6*)result->ai_addr;
+        addr->sin6_port = htons(port);
+    }
+
+    /* Create socket */
+    fd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    if (fd == INVALID_SOCKET)
+    {
+        freeaddrinfo(result);
+        lua_pushnil(_L);
+        return 1;
+    }
+
+    /* Connect */
+    if (connect(fd, result->ai_addr, result->ai_addrlen))
+    {
+        closesocket(fd);
+        freeaddrinfo(result);
+        lua_pushnil(_L);
+        return 1;
+    }
+
+    /* Free addrinfo */
+    freeaddrinfo(result);
+
+    /* We have a good socket */
+    SOCKET* socketPtr = (SOCKET*)lua_newuserdata(_L, sizeof(SOCKET));
+    *socketPtr = fd;
+    luaL_getmetatable(_L, "socket");
+    lua_setmetatable(_L, -2);
+
+    return 1;
+}
+
+int CScriptInstance::API_ClassSocketSend(void)
+{
+    SOCKET sock;
+    const char* payload;
+    size_t payloadLen;
+
+    sock = *(SOCKET*)luaL_checkudata(_L, 1, "socket");
+    payload = luaL_checklstring(_L, 2, &payloadLen);
+    send(sock, payload, payloadLen, 0);
+
+    return 0;
+}
+
+int CScriptInstance::API_ClassSocketRecv(void)
+{
+    SOCKET sock;
+    int size;
+    int recvSize;
+    int ret;
+    char tmp[1024];
+    luaL_Buffer b;
+
+    sock = *(SOCKET*)luaL_checkudata(_L, 1, "socket");
+    size = (int)luaL_checkinteger(_L, 2);
+
+    luaL_buffinit(_L, &b);
+    while (size)
+    {
+        recvSize = size > sizeof(tmp) ? sizeof(tmp) : size;
+        ret = recv(sock, tmp, recvSize, 0);
+        if (ret > 0)
+        {
+            luaL_addlstring(&b, tmp, ret);
+            size -= ret;
+        }
+    }
+    luaL_pushresult(&b);
+    return 1;
+}
+
+int CScriptInstance::API_ClassSocketClose(void)
+{
+    SOCKET sock;
+
+    sock = *(SOCKET*)luaL_checkudata(_L, 1, "socket");
+    closesocket(sock);
     return 0;
 }

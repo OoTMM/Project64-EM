@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "DebuggerUI.h"
+#include "ScriptInstance.h"
 
 CDebugScripts::CDebugScripts(CDebuggerUI* debugger) :
     CDebugDialog<CDebugScripts>(debugger),
