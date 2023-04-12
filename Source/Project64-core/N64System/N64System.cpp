@@ -1339,9 +1339,9 @@ void CN64System::SyncCPU(CN64System * const SecondCPU)
         }
     }
 
-    if (m_Random.get_state() != SecondCPU->m_Random.get_state()) 
+    if (m_Random.get_state() != SecondCPU->m_Random.get_state())
     {
-        ErrorFound = true; 
+        ErrorFound = true;
     }
     if (m_TLB != SecondCPU->m_TLB) { ErrorFound = true; }
     if (m_Reg.m_FPCR[0] != SecondCPU->m_Reg.m_FPCR[0]) { ErrorFound = true; }
@@ -1971,7 +1971,7 @@ bool CN64System::LoadState(const char * FileName)
             char zname[132];
 
             unzGetCurrentFileInfo(file, &info, zname, 128, nullptr, 0, nullptr, 0);
-            if (unzLocateFile(file, zname, 1) != UNZ_OK)
+            if (unzLocateFile(file, zname, reinterpret_cast<unzFileNameComparer>((void*)1)) != UNZ_OK)
             {
                 unzClose(file);
                 port = -1;

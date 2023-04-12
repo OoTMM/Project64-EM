@@ -351,7 +351,7 @@ bool CRomList::LoadDataFromRomFile(const char * FileName, uint8_t * Data, int32_
         while (port == UNZ_OK && FoundRom == false)
         {
             unzGetCurrentFileInfo(file, &info, zname, 128, nullptr, 0, nullptr, 0);
-            if (unzLocateFile(file, zname, 1) != UNZ_OK)
+            if (unzLocateFile(file, zname, reinterpret_cast<unzFileNameComparer>((void*)1)) != UNZ_OK)
             {
                 unzClose(file);
                 return true;

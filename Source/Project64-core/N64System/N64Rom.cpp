@@ -144,7 +144,7 @@ bool CN64Rom::AllocateAndLoadZipImage(const char * FileLoc, bool LoadBootCodeOnl
         char zname[260];
 
         unzGetCurrentFileInfo(file, &info, zname, sizeof(zname), nullptr, 0, nullptr, 0);
-        if (unzLocateFile(file, zname, 1) != UNZ_OK)
+        if (unzLocateFile(file, zname, reinterpret_cast<unzFileNameComparer>((void*)1)) != UNZ_OK)
         {
             SetError(MSG_FAIL_ZIP);
             break;

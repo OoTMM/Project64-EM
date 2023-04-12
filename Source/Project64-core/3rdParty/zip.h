@@ -1,4 +1,5 @@
 ﻿#pragma once
 
-#include "../../3rdParty/zlib/contrib/minizip/unzip.h"
-#include "../../3rdParty/zlib/contrib/minizip/zip.h"
+#include <zlib.h>
+#include <zip.h>
+#include <unzip.h>
