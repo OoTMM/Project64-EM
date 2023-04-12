@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdafx.h>
-#include <3rdParty/duktape/duktape.h>
 
 #include "ScriptInstance.h"
 

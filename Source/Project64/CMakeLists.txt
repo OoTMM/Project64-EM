@@ -4,7 +4,7 @@ add_definitions(-DUNICODE=1 -D_UNICODE=1)
 file(GLOB_RECURSE SOURCES "*.cpp" "*.h" "*.rc")
 include_directories("${CMAKE_SOURCE_DIR}/Source/3rdParty" "${CMAKE_SOURCE_DIR}/Source" "${CMAKE_SOURCE_DIR}/Source/Project64")
 add_executable(Project64-EM WIN32 ${SOURCES})
-target_link_libraries(Project64-EM PRIVATE discord-rpc ZLIB::ZLIB Lua::Lua MiniZip::MiniZip duktape 7zip Common Project64-core)
+target_link_libraries(Project64-EM PRIVATE discord-rpc ZLIB::ZLIB Lua::Lua MiniZip::MiniZip 7zip Common Project64-core)
 
 # Copy PJ64 & DLLs
 add_custom_command(
