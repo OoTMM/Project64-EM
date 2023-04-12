@@ -223,7 +223,7 @@ void CDebugScripts::RefreshStatus()
 
     stdstr statusText;
     CPath(stdstr_f("Scripts\\%s", m_SelectedScriptName.c_str())).GetFullyQualified(statusText);
-    
+
     if (state == STATE_RUNNING)
     {
         statusText += " (Running)";
@@ -264,7 +264,7 @@ LRESULT CDebugScripts::OnScriptListRClicked(NMHDR* pNMHDR)
     {
         EnableMenuItem(hPopupMenu, ID_POPUP_STOP, MF_DISABLED | MF_GRAYED);
     }
-    
+
     POINT mouse;
     GetCursorPos(&mouse);
     TrackPopupMenu(hPopupMenu, TPM_LEFTALIGN, mouse.x, mouse.y, 0, m_hWnd, nullptr);
@@ -435,7 +435,9 @@ void CDebugScripts::RunSelected()
 
     if (state == STATE_INVALID || state == STATE_STOPPED)
     {
-        m_Debugger->ScriptSystem()->RunScript(m_SelectedScriptName.c_str());
+        /* Get full path */
+        CPath scriptPath("Scripts", m_SelectedScriptName.c_str());
+        m_Debugger->ScriptSystem()->RunScript(scriptPath);
     }
     else
     {

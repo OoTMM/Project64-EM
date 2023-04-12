@@ -6,6 +6,14 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <mswsock.h>
+#include <thread>
+
+extern "C"
+{
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 
 #pragma comment(lib, "Ws2_32.lib")
 #pragma comment(lib, "Mswsock.lib")
@@ -32,6 +40,13 @@ public:
     void Eval(const char* code);
 
 private:
-    CDebuggerUI*        m_Debugger;
-    INSTANCE_STATE      m_State;
+    void RegisterAPI();
+    void ThreadEntry();
+
+    int API_Print(void);
+
+    CDebuggerUI*        _debugger;
+    INSTANCE_STATE      _state;
+    std::thread         _thread;
+    lua_State*          _L;
 };

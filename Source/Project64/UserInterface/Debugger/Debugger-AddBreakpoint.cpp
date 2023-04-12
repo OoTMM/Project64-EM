@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
-#include "DebuggerUI.h"
+#include "Debugger-AddBreakpoint.h"
+#include "Breakpoints.h"
 
 LRESULT CAddBreakpointDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {

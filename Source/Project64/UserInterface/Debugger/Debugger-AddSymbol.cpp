@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "DebuggerUI.h"
+#include "Debugger-AddSymbol.h"
 #include "Symbols.h"
 
 LRESULT CAddSymbolDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -22,7 +22,7 @@ LRESULT CAddSymbolDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*l
         }
         m_TypeComboBox.AddString(stdstr(typeName).ToUTF16().c_str());
     }
-    
+
     m_AddressEdit.SetWindowText(L"");
     m_AddressEdit.SetFocus();
 
@@ -41,7 +41,7 @@ LRESULT CAddSymbolDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*l
     {
         m_TypeComboBox.SetCurSel(SYM_DATA);
     }
-    
+
     return FALSE;
 }
 
@@ -66,13 +66,13 @@ LRESULT CAddSymbolDlg::OnClicked(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 
         int nameLen = m_NameEdit.GetWindowTextLength();
         int descLen = m_DescriptionEdit.GetWindowTextLength();
-        
+
         if (!nameLen && !descLen)
         {
             MessageBox(L"Name and/or description required", L"Error", MB_OK);
             return 0;
         }
-        
+
         m_Debugger->SymbolTable()->AddSymbol(type, address, GetCWindowText(m_NameEdit).c_str(), GetCWindowText(m_DescriptionEdit).c_str());
         m_Debugger->SymbolTable()->Save();
 

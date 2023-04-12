@@ -26,6 +26,7 @@ set(DATA_DEST "${PJ64_DIRECTORY}")
 
 add_custom_command(
   OUTPUT "${DATA_STAMP}"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "${DATA_DEST}/Scripts"
   COMMAND "${CMAKE_COMMAND}" -E make_directory "${DATA_DEST}/Plugin"
   COMMAND "${CMAKE_COMMAND}" -E make_directory "${DATA_DEST}/Lang"
   COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_SOURCE_DIR}/Plugin/x86" "${DATA_DEST}/Plugin"

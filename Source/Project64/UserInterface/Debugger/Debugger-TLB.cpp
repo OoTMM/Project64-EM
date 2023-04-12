@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
-#include "DebuggerUI.h"
+#include "DebugDialog.h"
+#include "Debugger-TLB.h"
 
 CDebugTlb::CDebugTlb(CDebuggerUI * debugger) :
     CDebugDialog<CDebugTlb>(debugger)

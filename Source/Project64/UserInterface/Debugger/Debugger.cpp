@@ -322,6 +322,7 @@ void CDebuggerUI::Debug_LogScriptsWindow(const char* text)
     if (m_Scripts != nullptr)
     {
         m_Scripts->ConsolePrint(text);
+        m_Scripts->ConsolePrint("\r\n");
     }
 }
 
