@@ -1566,7 +1566,7 @@ duk_ret_t CScriptInstance::js_FSOpen(duk_context* ctx)
     }
 
     duk_push_number(ctx, fd);
-    
+
     return 1;
 }
 
@@ -1584,7 +1584,7 @@ duk_ret_t CScriptInstance::js_FSClose(duk_context* ctx)
 
     int fd = duk_get_int(ctx, 0);
     duk_pop_n(ctx, nargs);
-    
+
     _this->CloseFile(fd);
 
     return 1;
@@ -1594,7 +1594,7 @@ duk_ret_t CScriptInstance::js_FSWrite(duk_context* ctx)
 {
     CScriptInstance* _this = FetchInstance(ctx);
     int nargs = duk_get_top(ctx);
-    
+
     size_t nBytesWritten = 0;
 
     if (nargs < 2)
@@ -1610,12 +1610,12 @@ duk_ret_t CScriptInstance::js_FSWrite(duk_context* ctx)
     {
         goto end;
     }
-    
+
     const char* buffer;
     int offset = 0;
     duk_size_t length = 0;
     int position = 0; // fseek
-    
+
     if (duk_is_string(ctx, 1))
     {
         // String
@@ -1628,7 +1628,7 @@ duk_ret_t CScriptInstance::js_FSWrite(duk_context* ctx)
     {
         // Buffer
         buffer = (const char*)duk_get_buffer_data(ctx, 1, &length);
-        
+
         if (buffer == nullptr)
         {
             goto end;
@@ -1754,7 +1754,7 @@ duk_ret_t CScriptInstance::js_FSFStat(duk_context* ctx)
         { "ctimeMs",  (duk_double_t)statbuf.st_ctime * 1000 },
         { nullptr, 0 }
     };
-    
+
     duk_put_number_list(ctx, obj_idx, props);
     return 1;
 }
@@ -1771,7 +1771,7 @@ duk_ret_t CScriptInstance::js_FSStat(duk_context* ctx)
     }
 
     const char* path = duk_get_string(ctx, 0);
-    
+
     struct stat statbuf;
     int res = stat(path, &statbuf);
 
@@ -1785,7 +1785,7 @@ duk_ret_t CScriptInstance::js_FSStat(duk_context* ctx)
     duk_pop_n(ctx, nargs);
 
     duk_idx_t obj_idx = duk_push_object(ctx);
-    
+
     const duk_number_list_entry props[] = {
         { "dev",      (duk_double_t)statbuf.st_dev },
         { "ino",      (duk_double_t)statbuf.st_ino },
@@ -1808,7 +1808,7 @@ duk_ret_t CScriptInstance::js_FSStat(duk_context* ctx)
 duk_ret_t CScriptInstance::js_FSMkDir(duk_context* ctx)
 {
     int nargs = duk_get_top(ctx);
-    
+
     if (nargs < 1)
     {
         duk_push_false(ctx);
@@ -1844,7 +1844,7 @@ duk_ret_t CScriptInstance::js_FSRmDir(duk_context* ctx)
     const char* path = duk_get_string(ctx, 0);
 
     duk_pop_n(ctx, nargs);
-    
+
     if (RemoveDirectoryA(path))
     {
         duk_push_true(ctx);
@@ -1896,7 +1896,7 @@ duk_ret_t CScriptInstance::js_FSReadDir(duk_context* ctx)
     const char* path = duk_get_string(ctx, 0);
 
     duk_pop_n(ctx, nargs);
-    
+
     WIN32_FIND_DATAA ffd;
     HANDLE hFind = FindFirstFileA(stdstr_f("%s%s", path, "\\*").c_str(), &ffd);
 
