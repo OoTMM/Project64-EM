@@ -131,6 +131,29 @@ void CScriptInstance::RegisterAPI()
     };
     luaL_newlib(_L, kRegSocket);
     lua_setglobal(_L, "socket");
+
+    /* Register binary */
+    static const luaL_Reg kRegBinary[] = {
+        { "pack_u8",    dispatch<&CScriptInstance::API_BinaryPack<uint8_t>>      },
+        { "pack_u16",   dispatch<&CScriptInstance::API_BinaryPack<uint16_t>>     },
+        { "pack_u32",   dispatch<&CScriptInstance::API_BinaryPack<uint32_t>>     },
+        { "pack_s8",    dispatch<&CScriptInstance::API_BinaryPack<int8_t>>       },
+        { "pack_s16",   dispatch<&CScriptInstance::API_BinaryPack<int16_t>>      },
+        { "pack_s32",   dispatch<&CScriptInstance::API_BinaryPack<int32_t>>      },
+        { "pack_f32",   dispatch<&CScriptInstance::API_BinaryPack<float>>        },
+        { "pack_f64",   dispatch<&CScriptInstance::API_BinaryPack<double>>       },
+        { "unpack_u8",  dispatch<&CScriptInstance::API_BinaryUnpack<uint8_t>>    },
+        { "unpack_u16", dispatch<&CScriptInstance::API_BinaryUnpack<uint16_t>>   },
+        { "unpack_u32", dispatch<&CScriptInstance::API_BinaryUnpack<uint32_t>>   },
+        { "unpack_s8",  dispatch<&CScriptInstance::API_BinaryUnpack<int8_t>>     },
+        { "unpack_s16", dispatch<&CScriptInstance::API_BinaryUnpack<int16_t>>    },
+        { "unpack_s32", dispatch<&CScriptInstance::API_BinaryUnpack<int32_t>>    },
+        { "unpack_f32", dispatch<&CScriptInstance::API_BinaryUnpack<float>>      },
+        { "unpack_f64", dispatch<&CScriptInstance::API_BinaryUnpack<double>>     },
+        { nullptr, nullptr }
+    };
+    luaL_newlib(_L, kRegBinary);
+    lua_setglobal(_L, "binary");
 }
 
 void CScriptInstance::ThreadEntry()
@@ -206,56 +229,60 @@ int CScriptInstance::API_SocketTcp(void)
 {
     SOCKET fd;
     const char* host;
+    char        portStr[16];
     uint16_t    port;
     addrinfo    hints{};
     addrinfo*   result;
+    addrinfo*   info;
 
     /* Get params */
     host = luaL_checkstring(_L, 1);
     port = (uint16_t)luaL_checkinteger(_L, 2);
 
+    if (port < 0 || port > 65535)
+    {
+        lua_pushnil(_L);
+        return 1;
+    }
+
+    /* Get port string */
+    sprintf_s(portStr, "%d", port);
+
     /* Resolve host */
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
-    if (getaddrinfo(host, nullptr, &hints, &result))
+    if (getaddrinfo(host, portStr, &hints, &result))
     {
         lua_pushnil(_L);
         return 1;
     }
 
-    /* Set port */
-    if (result->ai_family == AF_INET)
+    /* Try to connect in sequence */
+    info = result;
+    fd = INVALID_SOCKET;
+    for (;;)
     {
-        sockaddr_in* addr = (sockaddr_in*)result->ai_addr;
-        addr->sin_port = htons(port);
-    }
-    else if (result->ai_family == AF_INET6)
-    {
-        sockaddr_in6* addr = (sockaddr_in6*)result->ai_addr;
-        addr->sin6_port = htons(port);
-    }
+        fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+        if (fd != INVALID_SOCKET)
+        {
+            if (connect(fd, info->ai_addr, info->ai_addrlen) == 0)
+                break;
 
-    /* Create socket */
-    fd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+            closesocket(fd);
+            fd = INVALID_SOCKET;
+        }
+        info = info->ai_next;
+        if (!info)
+            break;
+    }
+    freeaddrinfo(result);
+
     if (fd == INVALID_SOCKET)
     {
-        freeaddrinfo(result);
         lua_pushnil(_L);
         return 1;
     }
-
-    /* Connect */
-    if (connect(fd, result->ai_addr, result->ai_addrlen))
-    {
-        closesocket(fd);
-        freeaddrinfo(result);
-        lua_pushnil(_L);
-        return 1;
-    }
-
-    /* Free addrinfo */
-    freeaddrinfo(result);
 
     /* We have a good socket */
     SOCKET* socketPtr = (SOCKET*)lua_newuserdata(_L, sizeof(SOCKET));
@@ -313,4 +340,28 @@ int CScriptInstance::API_ClassSocketClose(void)
     sock = *(SOCKET*)luaL_checkudata(_L, 1, "socket");
     closesocket(sock);
     return 0;
+}
+
+template <typename T> int CScriptInstance::API_BinaryPack(void)
+{
+    T       value;
+    char    buffer[sizeof(T)];
+
+    value = (T)luaL_checknumber(_L, 1);
+    memcpy(buffer, &value, sizeof(T));
+    lua_pushlstring(_L, buffer, sizeof(T));
+
+    return 1;
+}
+
+template <typename T> int CScriptInstance::API_BinaryUnpack(void)
+{
+    const char* str;
+    T           value;
+
+    str = luaL_checkstring(_L, 1);
+    memcpy(&value, str, sizeof(T));
+    lua_pushnumber(_L, lua_Number(value));
+
+    return 1;
 }

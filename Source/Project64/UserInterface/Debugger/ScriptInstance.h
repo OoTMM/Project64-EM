@@ -44,6 +44,8 @@ private:
     int API_ClassSocketSend(void);
     int API_ClassSocketRecv(void);
     int API_ClassSocketClose(void);
+    template <typename T> int API_BinaryPack(void);
+    template <typename T> int API_BinaryUnpack(void);
 
     CDebuggerUI*        _debugger;
     INSTANCE_STATE      _state;
