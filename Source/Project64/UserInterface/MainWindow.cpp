@@ -90,7 +90,7 @@ CMainGui::~CMainGui(void)
 
 bool CMainGui::RegisterWinClass(void)
 {
-    std::wstring VersionDisplay = stdstr_f("Project64 %s", VER_FILE_VERSION_STR).ToUTF16();
+    std::wstring VersionDisplay = stdstr_f("Project64-EM %s", VER_FILE_VERSION_STR).ToUTF16();
 
     WNDCLASS wcl;
 
@@ -209,7 +209,7 @@ void CMainGui::GameLoaded(CMainGui * Gui)
         WriteTrace(TraceUserInterface, TraceDebug, "Add recent ROM");
         Gui->AddRecentRom(FileLoc.c_str());
         Gui->SetWindowCaption(stdstr(g_Settings->LoadStringVal(Rdb_GoodName)).ToUTF16().c_str());
-		
+
 		if (UISettingsLoadBool(Setting_EnableDiscordRPC))
 		{
 			CDiscord::Update();
@@ -259,7 +259,7 @@ void CMainGui::ShowStatusBarChanged(CMainGui * Gui)
     if (!Gui->bCPURunning())
     {
         ShowWindow(Gui->m_hStatusWnd, g_Settings->LoadBool((SettingID)UserInterface_ShowStatusBar) ? SW_SHOW : SW_HIDE);
-        
+
         RECT rc;
         GetClientRect(Gui->m_hMainWindow, &rc);
         Gui->ResizeRomList((WORD)(rc.right - rc.left), (WORD)(rc.bottom - rc.top));
@@ -385,7 +385,7 @@ void CMainGui::Caption(LPCWSTR Caption)
 
 void CMainGui::Create(const char * WindowTitle)
 {
-    stdstr_f VersionDisplay("Project64 %s", VER_FILE_VERSION_STR);
+    stdstr_f VersionDisplay("Project64-EM %s", VER_FILE_VERSION_STR);
     m_hMainWindow = CreateWindowEx(WS_EX_ACCEPTFILES, VersionDisplay.ToUTF16().c_str(), stdstr(WindowTitle).ToUTF16().c_str(), WS_OVERLAPPED | WS_CLIPCHILDREN |
         WS_CLIPSIBLINGS | WS_SYSMENU | WS_MINIMIZEBOX, 5, 5, 640, 480,
         nullptr, nullptr, GetModuleHandle(nullptr), this);
@@ -500,7 +500,7 @@ int CMainGui::Width(void)
     return rect.right - rect.left;
 }
 
-float CMainGui::DPIScale(HWND hWnd) 
+float CMainGui::DPIScale(HWND hWnd)
 {
     return CClientDC(hWnd).GetDeviceCaps(LOGPIXELSX) / 96.0f;
 }
@@ -552,7 +552,7 @@ void CMainGui::SetStatusText(int Panel, const wchar_t * Text)
     {
         SendMessage(m_hStatusWnd, SB_SETTEXT, Panel, (LPARAM)Msg);
     }
-    else 
+    else
     {
         PostMessage(m_hStatusWnd, SB_SETTEXT, Panel, (LPARAM)Msg);
     }
@@ -914,7 +914,7 @@ LRESULT CALLBACK CMainGui::MainGui_Proc(HWND hWnd, DWORD uMsg, DWORD wParam, DWO
             if (_this == nullptr) { break; }
 
             switch (LOWORD(wParam)) {
-            case ID_POPUPMENU_PLAYGAME: 
+            case ID_POPUPMENU_PLAYGAME:
                 {
                     if ((CPath(_this->CurrentedSelectedRom()).GetExtension() != "ndd") && (CPath(_this->CurrentedSelectedRom()).GetExtension() != "d64"))
                     {
