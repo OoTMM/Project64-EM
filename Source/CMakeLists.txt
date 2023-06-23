@@ -6,3 +6,5 @@ add_subdirectory(Project64-core)
 add_subdirectory(Project64)
 add_subdirectory(RSP)
 add_subdirectory(Project64-input)
+
+install(DIRECTORY "${PJ64_DIRECTORY}/" DESTINATION .)

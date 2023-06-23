@@ -31,6 +31,7 @@ add_custom_command(
   COMMAND "${CMAKE_COMMAND}" -E make_directory "${DATA_DEST}/Lang"
   COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_SOURCE_DIR}/Plugin/x86" "${DATA_DEST}/Plugin"
   COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_SOURCE_DIR}/Lang" "${DATA_DEST}/Lang"
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_SOURCE_DIR}/Scripts" "${DATA_DEST}/Scripts"
   COMMAND "${CMAKE_COMMAND}" -E touch "${DATA_STAMP}"
   DEPENDS
     ${DATA_FILES}
