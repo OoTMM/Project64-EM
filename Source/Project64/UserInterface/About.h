@@ -16,10 +16,9 @@ public:
 
     enum { IDD = IDD_About };
 
-    CAboutDlg(CProjectSupport & Support);
+    CAboutDlg();
 
 private:
-    CAboutDlg(void);
     CAboutDlg(const CAboutDlg&);
     CAboutDlg& operator=(const CAboutDlg&);
 
@@ -30,7 +29,6 @@ private:
     LRESULT OnEraseBackground(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL & bHandled);
     LRESULT OnOkCmd(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL & bHandled);
 
-    CProjectSupport & m_Support;
     CBitmapPicture m_Logo;
     CFont m_BoldFont;
     CFont m_TextFont;

@@ -41,7 +41,6 @@ void RegisterUISettings (void)
     AddUISetting(UserInterface_AlwaysOnTop, new CSettingTypeApplication("Settings", "Always on top", (uint32_t)false));
     AddUISetting(UserInterface_ShowStatusBar, new CSettingTypeApplication("Settings", "Show Status Bar", true));
     AddUISetting(UserInterface_ExitFullscreenOnLoseFocus, new CSettingTypeApplication("Settings", "Exit Full Screen On Lose Focus", false));
-    AddUISetting(UserInterface_ShowingNagWindow, new CSettingTypeTempBool(false));
 
     AddUISetting(RomBrowser_Enabled, new CSettingTypeApplication("Rom Browser", "Rom Browser", true));
     AddUISetting(RomBrowser_ColoumnsChanged, new CSettingTypeTempBool(false));
@@ -77,7 +76,7 @@ void RegisterUISettings (void)
     AddUISetting(DebuggerUI_ExceptionBPPos, new CSettingTypeApplication("Debugger UI", "Exception BP Pos", Default_None));
 }
 
-float DPIScale(void) 
+float DPIScale(void)
 {
     return CClientDC(0).GetDeviceCaps(LOGPIXELSX) / 96.0f;
 }

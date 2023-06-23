@@ -1,8 +1,7 @@
 #include <stdafx.h>
 #include <Project64\UserInterface\About.h>
 
-CAboutDlg::CAboutDlg(CProjectSupport & Support) :
-    m_Support(Support)
+CAboutDlg::CAboutDlg()
 {
 }
 
@@ -12,10 +11,7 @@ LRESULT CAboutDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
     m_Logo.SetBitmap(MAKEINTRESOURCE(IDB_ABOUT_LOGO));
 
     stdstr AboutMsg;
-    if (m_Support.Validated() && strlen(m_Support.Name()) > 0)
-    {
-        AboutMsg += stdstr_f("Thank you %s for the support!\n\n", m_Support.Name());
-    }
+    AboutMsg += stdstr_f("Thank you kind stranger for the support!\n\n"); /* Pro-consumer, baby */
     AboutMsg += "Project64 is a completely free and open-source emulator for the Nintendo 64 and 64DD written in C++.\n\nCapable of playing your favorite N64 games on your PC with high-definition graphics, excellent compatibility, save states, built - in cheat codes, and more!";
 
     CDC hDC = GetDC();
@@ -55,7 +51,7 @@ void CAboutDlg::SetWindowDetais(int nIDDlgItem, int nAboveIDDlgItem, const wchar
     {
         Wnd.SetWindowPos(nullptr, 0, 0, rcWin.Width(), rcWin.Height(), SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER);
     }
-    
+
     CWindow AboveWnd = GetDlgItem(nAboveIDDlgItem);
     AboveWnd.GetWindowRect(&rcWin);
     ::MapWindowPoints(nullptr, m_hWnd, (LPPOINT)&rcWin, 2);

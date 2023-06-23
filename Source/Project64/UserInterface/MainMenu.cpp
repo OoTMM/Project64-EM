@@ -20,7 +20,6 @@ CMainMenu::CMainMenu(CMainGui * hMainWindow) :
     m_ChangeSettingList.push_back(GameRunning_LimitFPS);
     m_ChangeUISettingList.push_back(UserInterface_InFullScreen);
     m_ChangeUISettingList.push_back(UserInterface_AlwaysOnTop);
-    m_ChangeUISettingList.push_back(UserInterface_ShowingNagWindow);
     m_ChangeSettingList.push_back(UserInterface_ShowCPUPer);
     m_ChangeSettingList.push_back(Logging_GenerateLog);
     m_ChangeSettingList.push_back(Debugger_RecordExecutionTimes);
@@ -293,11 +292,6 @@ void CMainMenu::OnCheats(HWND /*hWnd*/)
 void CMainMenu::OnSettings(HWND hWnd)
 {
     CSettingConfig().Display(hWnd);
-}
-
-void CMainMenu::OnSupportProject64(HWND hWnd)
-{
-    CSupportWindow(m_Gui->Support()).Show(hWnd, false);
 }
 
 bool CMainMenu::ProcessMessage(HWND hWnd, DWORD /*FromAccelerator*/, DWORD MenuID)
@@ -589,10 +583,9 @@ bool CMainMenu::ProcessMessage(HWND hWnd, DWORD /*FromAccelerator*/, DWORD MenuI
         g_Notify->DisplayMessage(3, stdstr_f(GS(MENU_SLOT_SAVE), GetSaveSlotString((MenuID - ID_CURRENT_SAVE_1) + 1).c_str()).c_str());
         g_Settings->SaveDword(Game_CurrentSaveState, (DWORD)((MenuID - ID_CURRENT_SAVE_1) + 1));
         break;
-    case ID_HELP_SUPPORT_PROJECT64: OnSupportProject64(hWnd); break;
     case ID_HELP_DISCORD: ShellExecute(nullptr, L"open", L"https://discord.gg/Cg3zquF", nullptr, nullptr, SW_SHOWMAXIMIZED); break;
     case ID_HELP_WEBSITE: ShellExecute(nullptr, L"open", L"http://www.pj64-emu.com", nullptr, nullptr, SW_SHOWMAXIMIZED); break;
-    case ID_HELP_ABOUT: CAboutDlg(m_Gui->Support()).DoModal(); break;
+    case ID_HELP_ABOUT: CAboutDlg().DoModal(); break;
     default:
         if (MenuID >= ID_RECENT_ROM_START && MenuID < ID_RECENT_ROM_END)
         {
@@ -1285,7 +1278,6 @@ void CMainMenu::FillOutMenu(HMENU hMenu)
 
     // Help menu
     MenuItemList HelpMenu;
-    HelpMenu.push_back(MENU_ITEM(ID_HELP_SUPPORT_PROJECT64, MENU_SUPPORT_PROJECT64));
     HelpMenu.push_back(MENU_ITEM(ID_HELP_DISCORD, MENU_DISCORD));
     HelpMenu.push_back(MENU_ITEM(ID_HELP_WEBSITE, MENU_WEBSITE));
     HelpMenu.push_back(MENU_ITEM(SPLITER));
@@ -1317,14 +1309,6 @@ void CMainMenu::FillOutMenu(HMENU hMenu)
     Item.Reset(SUB_MENU, MENU_HELP, EMPTY_STDSTR, &HelpMenu);
     if (RomLoading) { Item.SetItemEnabled(false); }
     MainTitleMenu.push_back(Item);
-
-    if (UISettingsLoadBool(UserInterface_ShowingNagWindow))
-    {
-        for (MenuItemList::iterator MenuItem = MainTitleMenu.begin(); MenuItem != MainTitleMenu.end(); MenuItem++)
-        {
-            MenuItem->SetItemEnabled(false);
-        }
-    }
     AddMenu(hMenu, MainTitleMenu);
 }
 

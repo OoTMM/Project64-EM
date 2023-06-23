@@ -5,7 +5,6 @@
 #include <Project64-core/Plugins/Plugin.h>
 #include <Project64\UserInterface\CheatUI.h>
 #include <Project64\UserInterface\EnhancementUI.h>
-#include <Project64\UserInterface\ProjectSupport.h>
 
 class CGfxPlugin;      // Plugin that controls the rendering
 class CAudioPlugin;    // Plugin for audio, need the hwnd
@@ -46,7 +45,7 @@ public:
     WPARAM ProcessAllMessages(void);
     bool ProcessGuiMessages(void);
     void EnterLogOptions(void);
-    int Height(void); 
+    int Height(void);
     int Width(void);
     float DPIScale(HWND hWnd);
 
@@ -72,8 +71,6 @@ public:
     void * GetWindowHandle(void) const { return m_hMainWindow; }
     void * GetStatusBar(void) const;
     void * GetModuleInstance(void) const;
-
-    inline CProjectSupport & Support(void) { return m_Support; }
 
 private:
     CMainGui(void);
@@ -104,14 +101,13 @@ private:
     static void GamePaused(CMainGui * Gui);
     static void GameCpuRunning(CMainGui * Gui);
     static void ShowStatusBarChanged(CMainGui * Gui);
-    
+
     CBaseMenu * m_Menu;
 
     HWND m_hMainWindow, m_hStatusWnd;
     DWORD m_ThreadId;
     CCheatsUI m_CheatsUI;
     CEnhancementUI m_EnhancementUI;
-    CProjectSupport m_Support;
 
     const bool m_bMainWindow;
     bool m_Created;

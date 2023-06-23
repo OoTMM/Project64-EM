@@ -53,7 +53,7 @@ enum MainMenuID
     ID_PROFILE_PROFILE, ID_PROFILE_RESETCOUNTER, ID_PROFILE_GENERATELOG,
 
     // Help menu
-    ID_HELP_SUPPORT_PROJECT64, ID_HELP_DISCORD, ID_HELP_WEBSITE, ID_HELP_ABOUT,
+    ID_HELP_DISCORD, ID_HELP_WEBSITE, ID_HELP_ABOUT,
 };
 
 class CMainMenu :
@@ -84,7 +84,6 @@ private:
     void OnEnhancements(HWND hWnd);
     void OnCheats(HWND hWnd);
     void OnSettings(HWND hWnd);
-    void OnSupportProject64(HWND hWnd);
 
     void FillOutMenu(HMENU hMenu);
     std::wstring GetSaveSlotString(int Slot);
