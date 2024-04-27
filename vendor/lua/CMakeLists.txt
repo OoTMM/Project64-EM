@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(LUA_VERSION            5.4.4)
+set(LUA_VERSION            5.4.6)
 set(LUA_INSTALL_DIR        "${CMAKE_BINARY_DIR}/_vendor")
 set(LUA_INCLUDE_DIRECTORY  "${LUA_INSTALL_DIR}/include")
 set(LUA_LIBRARY_DIRECTORY  "${LUA_INSTALL_DIR}/lib")

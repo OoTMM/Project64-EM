@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(ZLIB_VERSION            1.2.13)
+set(ZLIB_VERSION            1.3.1)
 set(ZLIB_INSTALL_DIR        "${CMAKE_BINARY_DIR}/_vendor")
 set(ZLIB_INCLUDE_DIRECTORY  "${ZLIB_INSTALL_DIR}/include")
 set(ZLIB_LIBRARY_DIRECTORY  "${ZLIB_INSTALL_DIR}/lib")
