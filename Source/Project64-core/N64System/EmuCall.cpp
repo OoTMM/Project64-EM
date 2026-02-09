@@ -66,8 +66,6 @@ void EmuCall::SysCount()
 {
     uint32_t* pkt;
 
-    MessageBoxA(nullptr, "EmuCall: SysCount", "EmuCall", MB_OK);
-
     pkt = (uint32_t*)RamOffset(m_Dst);
     pkt[0] = 6;
 }
@@ -78,8 +76,6 @@ void EmuCall::SysSocketOpen()
     uint32_t*   pkt;
     SOCKET      sock;
     char        buf[128];
-
-    MessageBoxA(nullptr, "EmuCall: SysSocketOpen", "EmuCall", MB_OK);
 
     if (!HasSpace(8))
         return;
@@ -109,7 +105,6 @@ void EmuCall::SysSocketOpen()
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET)
     {
-        MessageBoxA(nullptr, "Failed to create socket", "EmuCall", MB_OK);
         pkt[0] = 0xffffffff;
         return;
     }
@@ -118,7 +113,6 @@ void EmuCall::SysSocketOpen()
     {
         int err = WSAGetLastError();
         sprintf(buf, "Failed to connect socket (Error: %d)", err);
-        MessageBoxA(nullptr, buf, "EmuCall", MB_OK);
         closesocket(sock);
         pkt[0] = 0xffffffff;
         return;
@@ -136,8 +130,6 @@ void EmuCall::SysSocketClose()
 {
     uint32_t    slot;
     uint32_t*   pkt;
-
-    MessageBoxA(nullptr, "EmuCall: SysSocketClose", "EmuCall", MB_OK);
 
     if (!HasSpace(8))
         return;
@@ -164,8 +156,6 @@ void EmuCall::SysSocketSend()
     uint32_t    len;
     SOCKET      sock;
     char*       src;
-
-    MessageBoxA(nullptr, "EmuCall: SysSocketSend", "EmuCall", MB_OK);
 
     if (!HasSpace(16))
         return;
@@ -211,8 +201,6 @@ void EmuCall::SysSocketRecv()
     uint32_t    len;
     SOCKET      sock;
     char*       dst;
-
-    MessageBoxA(nullptr, "EmuCall: SysSocketRecv", "EmuCall", MB_OK);
 
     if (!HasSpace(16))
         return;

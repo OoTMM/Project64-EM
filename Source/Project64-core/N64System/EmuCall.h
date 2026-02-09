@@ -24,6 +24,7 @@ private:
     void SysSocketSend();
     void SysSocketRecv();
     void SysSocketIsValid();
+    void SysSocketOpenAsync();
 
     static const uint32_t kMaxSockets = 4;
 
@@ -31,4 +32,5 @@ private:
 
     uint32_t        m_Dst;
     SOCKET          m_Sockets[kMaxSockets];
+    int             m_SocketsState[kMaxSockets];
 };
