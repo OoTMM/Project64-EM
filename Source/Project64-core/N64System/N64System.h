@@ -18,6 +18,7 @@
 #include "Mips/TLB.h"
 #include "FramePerSecond.h"
 #include "SpeedLimiter.h"
+#include "EmuCall.h"
 
 typedef std::list<SystemEvent>   EVENT_LIST;
 
@@ -127,6 +128,8 @@ private:
     void TLB_Unmaped(uint32_t VAddr, uint32_t Len);
     void TLB_Changed();
 
+    EmuCall& GetEmuCall() { return m_EmuCall; }
+
     CPlugins      * const m_Plugins;  // The plugin container
     CPlugins      * m_SyncPlugins;
     CN64System    * m_SyncCPU;
@@ -154,6 +157,7 @@ private:
     uint32_t        m_SyncCount;
     bool            m_SyncSystem;
     CRandom         m_Random;
+    EmuCall         m_EmuCall;
 
     // When syncing cores this is the PC where it last synced correctly
     uint32_t m_LastSuccessSyncPC[10];

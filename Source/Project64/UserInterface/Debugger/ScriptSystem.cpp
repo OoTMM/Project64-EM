@@ -6,9 +6,6 @@
 
 CScriptSystem::CScriptSystem(CDebuggerUI* debugger)
 {
-    WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-
     m_Debugger = debugger;
 
     HMODULE hInst = GetModuleHandle(nullptr);

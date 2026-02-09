@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "N64SYstem.h"
+#include "N64System.h"
 #include <Project64-core/3rdParty/zip.h>
 #include <Project64-core/N64System/Recompiler/RecompilerCodeLog.h>
 #include <Project64-core/N64System/SystemGlobals.h>
@@ -50,7 +50,8 @@ CN64System::CN64System(CPlugins * Plugins, uint32_t randomizer_seed, bool SavesR
     m_thread(nullptr),
     m_hPauseEvent(true),
     m_SyncSystem(SyncSystem),
-    m_Random(randomizer_seed)
+    m_Random(randomizer_seed),
+    m_EmuCall(m_MMU_VM)
 {
     WriteTrace(TraceN64System, TraceDebug, "Start");
     memset(m_LastSuccessSyncPC, 0, sizeof(m_LastSuccessSyncPC));
@@ -793,6 +794,7 @@ void CN64System::GameReset()
     {
         m_SyncCPU->GameReset();
     }
+    m_EmuCall.Reset();
 }
 
 void CN64System::PluginReset()
@@ -825,6 +827,7 @@ void CN64System::PluginReset()
     {
         m_SyncCPU->m_Plugins->RomOpened();
     }
+    m_EmuCall.Reset();
 #ifdef _WIN32
     _controlfp(_PC_53, _MCW_PC);
 #endif
@@ -845,6 +848,7 @@ void CN64System::Reset(bool bInitReg, bool ClearMenory)
     RefreshGameSettings();
     m_Audio.Reset();
     m_MMU_VM.Reset(ClearMenory);
+    m_EmuCall.Reset();
 
     m_CyclesToSkip = 0;
     m_AlistCount = 0;
