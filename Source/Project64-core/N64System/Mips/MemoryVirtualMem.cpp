@@ -815,6 +815,12 @@ bool CMipsMemoryVM::SW_NonMemory(uint32_t PAddr, uint32_t Value)
         }
     }
 
+    if (PAddr == 0x049da154)
+    {
+        g_System->GetEmuCall().Perform(Value);
+        return true;
+    }
+
     switch (PAddr & 0xFFF00000)
     {
     case 0x00000000:
@@ -863,7 +869,6 @@ bool CMipsMemoryVM::SW_NonMemory(uint32_t PAddr, uint32_t Value)
     case 0x04600000: Write32PeripheralInterface(); break;
     case 0x04700000: Write32RDRAMInterface(); break;
     case 0x04800000: Write32SerialInterface(); break;
-    case 0x049da154: g_System->GetEmuCall().Perform(Value); break;
     case 0x05000000: Write32CartridgeDomain2Address1(); break;
     case 0x08000000: Write32CartridgeDomain2Address2(); break;
     case 0x1FC00000: Write32PifRam(); break;

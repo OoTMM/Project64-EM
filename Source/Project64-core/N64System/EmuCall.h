@@ -23,8 +23,9 @@ private:
     void SysSocketClose();
     void SysSocketSend();
     void SysSocketRecv();
+    void SysSocketIsValid();
 
-    static const uint32_t kMaxSockets = 1;
+    static const uint32_t kMaxSockets = 4;
 
     CMipsMemoryVM&  m_Memory;
 

@@ -22,14 +22,6 @@ void EmuCall::Reset()
     }
 }
 
-static uint32_t swap32(uint32_t value)
-{
-    return ((value & 0x000000FF) << 24) |
-           ((value & 0x0000FF00) << 8) |
-           ((value & 0x00FF0000) >> 8) |
-           ((value & 0xFF000000) >> 24);
-}
-
 void EmuCall::Perform(uint32_t value)
 {
     uint32_t op;
@@ -40,7 +32,7 @@ void EmuCall::Perform(uint32_t value)
     if (value & 0x03)
         return;
 
-    op = swap32(*(uint32_t*)(m_Memory.Rdram() + value));
+    op = *(uint32_t*)(m_Memory.Rdram() + value);
     m_Dst = value;
 
     switch (op)
@@ -50,6 +42,7 @@ void EmuCall::Perform(uint32_t value)
     case 2: SysSocketClose(); break;
     case 3: SysSocketSend(); break;
     case 4: SysSocketRecv(); break;
+    case 5: SysSocketIsValid(); break;
     }
 }
 
@@ -71,28 +64,38 @@ char* EmuCall::RamOffset(uint32_t offset)
 
 void EmuCall::SysCount()
 {
-    char* dst;
-    uint32_t tmp;
+    uint32_t* pkt;
 
-    dst = (char*)m_Memory.Rdram() + m_Dst;
-    tmp = swap32(1);
-    memcpy(dst, &tmp, 4);
+    MessageBoxA(nullptr, "EmuCall: SysCount", "EmuCall", MB_OK);
+
+    pkt = (uint32_t*)RamOffset(m_Dst);
+    pkt[0] = 6;
 }
 
 void EmuCall::SysSocketOpen()
 {
     uint32_t    slot;
-    uint32_t*   data;
+    uint32_t*   pkt;
     SOCKET      sock;
+    char        buf[128];
+
+    MessageBoxA(nullptr, "EmuCall: SysSocketOpen", "EmuCall", MB_OK);
 
     if (!HasSpace(8))
         return;
 
-    data = (uint32_t*)RamOffset(m_Dst);
-    slot = swap32(data[1]);
-    if (slot >= kMaxSockets || m_Sockets[slot] != INVALID_SOCKET)
+    pkt = (uint32_t*)RamOffset(m_Dst);
+    slot = pkt[1];
+    if (slot >= kMaxSockets)
     {
-        data[0] = 0xffffffff;
+        pkt[0] = 0xffffffff;
+        return;
+    }
+
+    /* Socket already open? */
+    if (m_Sockets[slot] != INVALID_SOCKET)
+    {
+        pkt[0] = 0;
         return;
     }
 
@@ -100,20 +103,24 @@ void EmuCall::SysSocketOpen()
     sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(12500 + slot);
+    addr.sin_port = htons(55630 + slot);
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
     sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET)
     {
-        data[0] = 0xffffffff;
+        MessageBoxA(nullptr, "Failed to create socket", "EmuCall", MB_OK);
+        pkt[0] = 0xffffffff;
         return;
     }
 
     if (connect(sock, (sockaddr*)&addr, sizeof(addr)) != 0)
     {
+        int err = WSAGetLastError();
+        sprintf(buf, "Failed to connect socket (Error: %d)", err);
+        MessageBoxA(nullptr, buf, "EmuCall", MB_OK);
         closesocket(sock);
-        data[0] = 0xffffffff;
+        pkt[0] = 0xffffffff;
         return;
     }
 
@@ -122,29 +129,31 @@ void EmuCall::SysSocketOpen()
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 
     m_Sockets[slot] = sock;
-    data[0] = 0;
+    pkt[0] = 0;
 }
 
 void EmuCall::SysSocketClose()
 {
     uint32_t    slot;
-    uint32_t*   data;
+    uint32_t*   pkt;
+
+    MessageBoxA(nullptr, "EmuCall: SysSocketClose", "EmuCall", MB_OK);
 
     if (!HasSpace(8))
         return;
 
-    data = (uint32_t*)RamOffset(m_Dst);
-    slot = swap32(data[1]);
+    pkt = (uint32_t*)RamOffset(m_Dst);
+    slot = pkt[1];
     if (slot >= kMaxSockets || m_Sockets[slot] == INVALID_SOCKET)
     {
-        data[0] = 0xffffffff;
+        pkt[0] = 0xffffffff;
         return;
     }
 
     shutdown(m_Sockets[slot], SD_BOTH);
     closesocket(m_Sockets[slot]);
     m_Sockets[slot] = INVALID_SOCKET;
-    data[0] = 0;
+    pkt[0] = 0;
 }
 
 void EmuCall::SysSocketSend()
@@ -154,15 +163,17 @@ void EmuCall::SysSocketSend()
     uint32_t    ptr;
     uint32_t    len;
     SOCKET      sock;
-    void*       src;
+    char*       src;
+
+    MessageBoxA(nullptr, "EmuCall: SysSocketSend", "EmuCall", MB_OK);
 
     if (!HasSpace(16))
         return;
 
     msg = (uint32_t*)RamOffset(m_Dst);
-    slot = swap32(msg[1]);
-    ptr = swap32(msg[2]);
-    len = swap32(msg[3]);
+    slot = msg[1];
+    ptr = msg[2] & 0x0fffffff;
+    len = msg[3];
 
     if (slot >= kMaxSockets || m_Sockets[slot] == INVALID_SOCKET || len >= 0x100000 || !BoundsCheck(ptr, len))
     {
@@ -170,14 +181,26 @@ void EmuCall::SysSocketSend()
         return;
     }
 
-    src = RamOffset(ptr);
+    /* Copy */
+    if (len > 0)
+    {
+        src = (char*)malloc(len);
+        for (uint32_t i = 0; i < len; ++i)
+            src[i] = (char)m_Memory.Rdram()[(ptr + i) ^ 3];
+    }
+    else
+    {
+        src = nullptr;
+    }
+
     sock = m_Sockets[slot];
 
-    int result = send(sock, (const char*)src, len, 0);
+    int result = send(sock, src, len, 0);
     if (result == SOCKET_ERROR)
         msg[0] = 0xffffffff;
     else
-        msg[0] = swap32(result);
+        msg[0] = (uint32_t)result;
+    free(src);
 }
 
 void EmuCall::SysSocketRecv()
@@ -187,15 +210,17 @@ void EmuCall::SysSocketRecv()
     uint32_t    ptr;
     uint32_t    len;
     SOCKET      sock;
-    void*       dst;
+    char*       dst;
+
+    MessageBoxA(nullptr, "EmuCall: SysSocketRecv", "EmuCall", MB_OK);
 
     if (!HasSpace(16))
         return;
 
     msg = (uint32_t*)RamOffset(m_Dst);
-    slot = swap32(msg[1]);
-    ptr = swap32(msg[2]);
-    len = swap32(msg[3]);
+    slot = msg[1];
+    ptr = msg[2] & 0x0fffffff;
+    len = msg[3];
 
     if (slot >= kMaxSockets || m_Sockets[slot] == INVALID_SOCKET || len >= 0x100000 || !BoundsCheck(ptr, len))
     {
@@ -203,12 +228,51 @@ void EmuCall::SysSocketRecv()
         return;
     }
 
-    dst = RamOffset(ptr);
+    if (len)
+    {
+        dst = (char*)malloc(len);
+    }
+    else
+    {
+        dst = nullptr;
+    }
     sock = m_Sockets[slot];
 
-    int result = recv(sock, (char*)dst, len, 0);
-    if (result == SOCKET_ERROR)
+    int result = recv(sock, dst, len, 0);
+
+    /* Copy */
+    if (result >= 0)
+    {
+        for (int i = 0; i < result; ++i)
+            m_Memory.Rdram()[(ptr + i) ^ 3] = dst[i];
+        msg[0] = (uint32_t)result;
+    }
+    else
+        msg[0] = 0xffffffff;
+    free(dst);
+}
+
+void EmuCall::SysSocketIsValid()
+{
+    uint32_t*   msg;
+    uint32_t    slot;
+    SOCKET      sock;
+
+    if (!HasSpace(8))
+        return;
+
+    msg = (uint32_t*)RamOffset(m_Dst);
+    slot = msg[1];
+
+    if (slot >= kMaxSockets)
+    {
+        msg[0] = 0xffffffff;
+        return;
+    }
+
+    sock = m_Sockets[slot];
+    if (sock == INVALID_SOCKET)
         msg[0] = 0xffffffff;
     else
-        msg[0] = swap32(result);
+        msg[0] = 0;
 }
