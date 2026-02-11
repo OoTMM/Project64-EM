@@ -19,18 +19,14 @@ private:
     char* RamOffset(uint32_t offset);
 
     void SysCount();
-    void SysSocketOpen();
-    void SysSocketClose();
-    void SysSocketSend();
-    void SysSocketRecv();
-    void SysSocketIsValid();
-    void SysSocketOpenAsync();
-
-    static const uint32_t kMaxSockets = 4;
+    void SysValidIPC();
+    void SysOpenIPC();
+    void SysCloseIPC();
+    void SysSendIPC();
+    void SysRecvIPC();
 
     CMipsMemoryVM&  m_Memory;
 
     uint32_t        m_Dst;
-    SOCKET          m_Sockets[kMaxSockets];
-    int             m_SocketsState[kMaxSockets];
+    HANDLE          m_PipePIC;
 };
